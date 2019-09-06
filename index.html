@@ -1,6 +1,7 @@
 <html>
+
 <body>
-<textarea id="printContent" cols="60" rows="30">
+    <textarea id="printContent" cols="60" rows="30">
 Q192,019
 q831
 rN
@@ -22,34 +23,73 @@ A353,6,1,2,2,2,R,"%Heia%"
 A27,39,0,2,1,1,N,"%Heihei%"
 P1
 </textarea>
-	<input type="submit" onclick="print()" value="Print"/>
-    <input type="submit" onclick="connect()" value="Connect"/>
-    <input type="submit" onclick="connectAndPrint()" value="ConnectAndPrint"/>
-	<P>Type text into box and click on submit button.
-	<script>
+    <input type="submit" onclick="findDeviceAndPrint()" value="Print" />
+    <input type="submit" onclick="connect()" value="Connect" />
+    <input type="submit" onclick="connectAndPrint()" value="ConnectAndPrint" />
+    <P>Type text into box and click on submit button.
+        <script>
+            function connect() {
+                navigator.usb.requestDevice({ filters: [{ vendorId: 2655 }] })
+                    .then(selectedDevice => {
+                        console.log(selectedDevice);
+                    }).catch(error => { console.log(error + " GG"); });
+            }
+            function connectAndPrint() {
+                var device;
+                let printString = document.getElementById("printContent").value + "\n";
+                let encoder = new TextEncoder();
+                const printBuffer = encoder.encode(printString);
+                navigator.usb.device
 
-    function connectAndPrint() {
-        var device;
-        let printString = document.getElementById("printContent").value + "\n"; 
-        let encoder = new TextEncoder();
-        const printBuffer = encoder.encode(printString);
+                navigator.usb.requestDevice({ filters: [{ vendorId: 2655 }] })
+                    .then(selectedDevice => {
+                        device = selectedDevice;
+                        return device.open();
+                    })
+                    .then(() => device.selectConfiguration(1))
+                    .then(() => device.claimInterface(0))
+                    .then(() => device.transferOut(6, printBuffer))
+                    .then(result => {
+                        let decoder = new TextDecoder();
+                        console.log('Received: ' + decoder.decode(result.data));
+                    })
+                    .catch(error => { console.log(error + " GG"); });
+            }
 
-        navigator.usb.requestDevice({ filters: [{ vendorId: 2655 }] })
-            .then(selectedDevice => {
-                device = selectedDevice;
-                return device.open();
-            })
-            .then(() => device.selectConfiguration(1))
-            .then(() => device.claimInterface(0)) 
-            .then(() => device.transferOut(6, printBuffer)) 
-            .then(result => {
-                let decoder = new TextDecoder();
-                console.log('Received: ' + decoder.decode(result.data));
-            })
-            .catch(error => { console.log(error + " GG"); });
-        }
+            function findDeviceAndPrint() {
+                navigator.usb.getDevices()
+                    .then(devices => {
+                        console.log("Total devices: " + devices.length);
+                        devices.forEach(device => {
+                            console.log("Product name: " + device.productName + ", serial number " + device.serialNumber);
+                            if (device.productName == "LP2844") {
+                                let printString = document.getElementById("printContent").value + "\n";
+                                let encoder = new TextEncoder();
+                                const printBuffer = encoder.encode(printString);
+                                if (!device.opened) {
+                                    console.log("Device not opened. Opening..");
+                                    device.open()
+                                        .then(() => device.selectConfiguration(1))
+                                        .then(() => device.claimInterface(0))
+                                        .then(() => device.transferOut(6, printBuffer))
+                                        .then(result => {
+                                            let decoder = new TextDecoder();
+                                            console.log('Received: ' + decoder.decode(result.data));
+                                        })
+                                        .catch(error => { console.log(error + " GG"); });
+                                } else {
+                                    device.transferOut(6, printBuffer).then(result => {
+                                        let decoder = new TextDecoder();
+                                        console.log('Received: ' + decoder.decode(result.data));
+                                    })
+                                        .catch(error => { console.log(error + " GG"); });
+                                }
+                            }
+                        });
+                    });
+            }
 
-
-	</script>
+        </script>
 </body>
+
 </html>
