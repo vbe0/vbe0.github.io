@@ -1,95 +1,38 @@
-<html>
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Basic HTML Site</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
 <body>
-    <textarea id="printContent" cols="60" rows="30">
-Q192,019
-q831
-rN
-S3
-D12
-ZT
-JB
-OD
-R227,0
-N
-B26,0,0,1,2,6,35,N,"%Heihei%"
-I8,A,047
-A8,159,0,2,1,1,N,"%123% - %Per%"
-A25,88,0,2,1,1,N,"%Geir Geirsen%"
-A5,139,0,1,1,1,N,"i dag: %ggwp%"
-A26,62,0,3,1,1,N,"%PatientId%"
-A6,114,0,3,1,1,N,"%Denne er bra%"
-A353,6,1,2,2,2,R,"%Heia%"
-A27,39,0,2,1,1,N,"%Heihei%"
-P1
-</textarea>
-    <input type="submit" onclick="findDeviceAndPrint()" value="Print" />
-    <input type="submit" onclick="connect()" value="Connect" />
-    <input type="submit" onclick="connectAndPrint()" value="ConnectAndPrint" />
-    <P>Type text into box and click on submit button.
-        <script>
-            function connect() {
-                navigator.usb.requestDevice({ filters: [{ vendorId: 2655 }] })
-                    .then(selectedDevice => {
-                        console.log(selectedDevice);
-                    }).catch(error => { console.log(error + " GG"); });
-            }
-            function connectAndPrint() {
-                var device;
-                let printString = document.getElementById("printContent").value + "\n";
-                let encoder = new TextEncoder();
-                const printBuffer = encoder.encode(printString);
-                navigator.usb.device
-
-                navigator.usb.requestDevice({ filters: [{ vendorId: 2655 }] })
-                    .then(selectedDevice => {
-                        device = selectedDevice;
-                        return device.open();
-                    })
-                    .then(() => device.selectConfiguration(1))
-                    .then(() => device.claimInterface(0))
-                    .then(() => device.transferOut(6, printBuffer))
-                    .then(result => {
-                        let decoder = new TextDecoder();
-                        console.log('Received: ' + decoder.decode(result.data));
-                    })
-                    .catch(error => { console.log(error + " GG"); });
-            }
-
-            function findDeviceAndPrint() {
-                navigator.usb.getDevices()
-                    .then(devices => {
-                        console.log("Total devices: " + devices.length);
-                        devices.forEach(device => {
-                            console.log("Product name: " + device.productName + ", serial number " + device.serialNumber);
-                            if (device.productName == "LP2844") {
-                                let printString = document.getElementById("printContent").value + "\n";
-                                let encoder = new TextEncoder();
-                                const printBuffer = encoder.encode(printString);
-                                if (!device.opened) {
-                                    console.log("Device not opened. Opening..");
-                                    device.open()
-                                        .then(() => device.selectConfiguration(1))
-                                        .then(() => device.claimInterface(0))
-                                        .then(() => device.transferOut(6, printBuffer))
-                                        .then(result => {
-                                            let decoder = new TextDecoder();
-                                            console.log('Received: ' + decoder.decode(result.data));
-                                        })
-                                        .catch(error => { console.log(error + " GG"); });
-                                } else {
-                                    device.transferOut(6, printBuffer).then(result => {
-                                        let decoder = new TextDecoder();
-                                        console.log('Received: ' + decoder.decode(result.data));
-                                    })
-                                        .catch(error => { console.log(error + " GG"); });
-                                }
-                            }
-                        });
-                    });
-            }
-
-        </script>
+  <header>
+    <h1>Welcome to My Website</h1>
+  </header>
+  <nav>
+    <ul>
+      <li><a href="#home">Home</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+  <main>
+    <section id="home">
+      <h2>Home</h2>
+      <p>This is the home section.</p>
+    </section>
+    <section id="about">
+      <h2>About</h2>
+      <p>This is the about section.</p>
+    </section>
+    <section id="contact">
+      <h2>Contact</h2>
+      <p>This is the contact section.</p>
+    </section>
+  </main>
+  <footer>
+    <p>&copy; 2024 My Basic HTML Site</p>
+  </footer>
 </body>
-
 </html>
